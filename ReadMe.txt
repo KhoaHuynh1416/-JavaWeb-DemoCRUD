@@ -2,7 +2,7 @@ GitHub: https://github.com/KhoaHuynh1416/-JavaWeb-DemoCRUD
 Mô tả chương trình: Demo CRUD sản phẩm điện thoại/phụ kiện
 --Môi trường:
 ----Phiên bản Java: JRE 8
-----Server: JBoss 7.1
+----Server: Wildfly 24+
 ----DBMS: MySQL, Connector 5
 ----IDE: Eclipse 2022
 ----OS: Windows 10

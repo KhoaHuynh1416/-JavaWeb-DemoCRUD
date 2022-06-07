@@ -1,10 +1,11 @@
 package com.demo.servlet;
 
+import static java.lang.Integer.parseInt;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,24 +15,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.demo.model.SanPhamDAO;
 import com.demo.model.SanPhamDTO;
-import com.demo.service.ProductListLocal;
 
 /**
  * Servlet implementation class MyServlet
  */
 @WebServlet(urlPatterns={"/", "/delete", "/list", "/update", "/new", "/insert", "/edit"})
 public class Servlet extends HttpServlet {
-	
-	@EJB
-	ProductListLocal productService;
-		
+			
 	private static final long serialVersionUID = 1L;
  
+	private SanPhamDAO productConn;
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
     public Servlet(){
         super();
+        productConn = new SanPhamDAO();
         // TODO Auto-generated constructor stub
     }
 
@@ -93,7 +93,7 @@ public class Servlet extends HttpServlet {
             throws SQLException, ServletException, IOException {
         
     	//goi service lay ds san pham
-    	ArrayList<Object> listProduct = productService.fetchProduct();
+    	ArrayList<Object> listProduct = productConn.docDSSP();
 
     	//gui danh sach san pham len jsp
         request.setAttribute("listProduct", listProduct);
@@ -103,7 +103,7 @@ public class Servlet extends HttpServlet {
  
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {  	
-    	ArrayList<Object> productTypeList = productService.getTypeList();
+    	ArrayList<Object> productTypeList = productConn.docDSLoaiSP();
   
         RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductForm.jsp");
         request.setAttribute("typeList", productTypeList);
@@ -113,8 +113,8 @@ public class Servlet extends HttpServlet {
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         String id = request.getParameter("id");
-        SanPhamDTO existingProduct = productService.getProductByID(id);
-		ArrayList<Object> productTypeList = productService.getTypeList();
+        SanPhamDTO existingProduct = productConn.getSanphamByMaSP(id);
+		ArrayList<Object> productTypeList = productConn.docDSLoaiSP();
         
         RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductForm.jsp");
         request.setAttribute("product", existingProduct);
@@ -134,10 +134,13 @@ public class Servlet extends HttpServlet {
         
         //tao mot DTO trung gian chua input
         SanPhamDTO newProduct = new SanPhamDTO();
+        
         newProduct.setTenSP(pname);
         newProduct.setMaLoai(ptype);
         newProduct.setDonGia(price);
+
         try {
+        	newProduct.setMaSP(taoMaSP());
 			newProduct.setSoLuong(quantity);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -145,7 +148,7 @@ public class Servlet extends HttpServlet {
 		}
         
         //goi service gui input ve CSDL
-        productService.insertProduct(newProduct);
+        productConn.them(newProduct);
         response.sendRedirect("list");
     }
  
@@ -158,7 +161,7 @@ public class Servlet extends HttpServlet {
         String ptype = request.getParameter("ptype");
  
         SanPhamDTO newProduct = new SanPhamDTO(id, pname, quantity, price, ptype);
-        productService.updateProduct(newProduct);
+        productConn.sua(newProduct);
         response.sendRedirect("list");
     }
  
@@ -166,8 +169,47 @@ public class Servlet extends HttpServlet {
             throws SQLException, IOException {
         String id = request.getParameter("id");
  
-        productService.deleteProduct(id);
+        productConn.xoa(id);
         response.sendRedirect("list");
     }
 	
+	 public String taoMaSP() throws Exception{
+	        ArrayList<Object> DSSanPham = productConn.docDSSP();
+	        
+	        if(DSSanPham.isEmpty()){
+	            return "sp001";
+	        }
+	        
+	        //Lay ma san pham cuoi cung trong CSDL
+	        String MaSPCuoi = ((SanPhamDTO) DSSanPham.get(DSSanPham.size()-1)).getMaSP();
+	        
+	        String KeyString = "";
+	        int vitri = 0;
+	        
+	        //MaSP = 'spxxx', Loai bo 'sp' de lay 'xxx' la mot so nguyen va gan cho KeyString
+	        while(vitri < MaSPCuoi.length()){
+	            if(MaSPCuoi.charAt(vitri) != 's' && MaSPCuoi.charAt(vitri) != 'p'){
+	                KeyString += MaSPCuoi.charAt(vitri);
+	            }
+	            vitri++;
+	        }
+	        
+	        //parse KeyString thanh Int va ++ de co ma so moi
+	        int KeyCode = parseInt(KeyString);
+	        KeyCode++;
+	        
+	        //Them 'sp' len truoc de tro ve dinh dang MaSP
+	        if(KeyCode >= 100){
+	            KeyString = "sp" + KeyCode;
+	        }
+	        else 
+	            if(KeyCode >=10){
+	            KeyString = "sp0" + KeyCode;
+	        }
+	            else{
+	                KeyString = "sp00" + KeyCode;
+	            }
+	        
+	        return KeyString;
+	    }
 }

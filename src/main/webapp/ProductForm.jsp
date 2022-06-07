@@ -66,11 +66,11 @@
                 <td>
                     <select name="ptype">
                     <c:forEach var="type" items="${typeList}">
-                    <c:if test="${(product==null) || product!=null && !type[0].equalsIgnoreCase(product.getMaLoai())}">
-                    <option value="${type[0]}"> ${type[1]} </option>
+                    <c:if test="${(product==null) || product!=null && !type.getMaLoai().equalsIgnoreCase(product.getMaLoai())}">
+                    <option value="${type.getMaLoai()}"> ${type.getTenLoai()} </option>
                     </c:if>
-                    <c:if test="${product!=null && type[0].equalsIgnoreCase(product.getMaLoai())}">
-                    <option value="${type[0]}" selected="selected"> ${type[1]} </option>
+                    <c:if test="${product!=null && type.getMaLoai().equalsIgnoreCase(product.getMaLoai())}">
+                    <option value="${type.getMaLoai()}" selected="selected"> ${type.getTenLoai()} </option>
                     </c:if>
                     </c:forEach>
                     </select>

@@ -5,24 +5,43 @@
  */
 package com.demo.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  *
  * @author PC
  */
-public class SanPhamDTO {
-    protected String MaSP;
-    protected String TenSP;
-    protected int SoLuong;
-    protected float DonGia;
-    protected String MaLoai;
-    
-    public SanPhamDTO(){
-        MaSP = "";
-        TenSP = "";
-        SoLuong = 0;
-        DonGia = 0;
-        MaLoai = "";
-    }
+
+@Entity
+@Table(name="sanpham")
+public class SanPhamDTO { 
+
+	 @Id
+	 @Column(name="masp")
+	 protected String MaSP;
+	 
+	 @Column(name="tensp")
+	 protected String TenSP;
+	 
+	 @Column(name="dongia")
+	 protected float DonGia;
+	 
+	 @Column(name="soluong")
+	 protected int SoLuong;
+	 
+	 @Column(name="maloai")
+	 protected String MaLoai;
+	 
+	 public SanPhamDTO() {
+		 MaSP = "";
+		 TenSP = "";
+		 DonGia = 0;
+		 SoLuong = 0;
+		 MaLoai = "";
+	 }
 
     public SanPhamDTO(String ma, String ten, int sl, float gia, String loai){
         this.setMaSP(ma);

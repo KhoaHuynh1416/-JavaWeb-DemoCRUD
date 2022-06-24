@@ -8,7 +8,7 @@ import com.demo.model.SanPhamDTO;
 
 @Remote
 public interface ProductListRemote {
-	ArrayList<Object> fetchProduct();	
+	ArrayList<SanPhamDTO> fetchProduct();	
 	SanPhamDTO getProductByID(String id);
-	ArrayList<Object> getTypeList();
+	ArrayList<SanPhamDTO> getTypeList();
 }

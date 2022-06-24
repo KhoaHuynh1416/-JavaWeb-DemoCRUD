@@ -9,13 +9,10 @@ Mô tả chương trình: Demo CRUD sản phẩm điện thoại/phụ kiện
 --Cấu trúc:
 ---BE: 3 package model, service, servlet
 ----com.demo.model
------MyConnection: kết nối CSDL
------SanPhamDAO: SQL Query
------SanPhamDTO: trung chuyển dữ liệu
-----com.demo.service
------ProductList: chi tiết toàn bộ các hàm xử lý
------ProductListLocal: các hàm quản lý/máy chủ có thể gọi
------ProductListRemote: các hàm khách có thể gọi
+-----HiberConnection: Map to Database
+-----SanPhamDAO: Transactions
+-----SanPhamDTO: Map to Database, Data Transfer Object
+-----TypeDTO: Map to Database, Data Transfer Object
 ----com.demo.servlet
 -----Servlet: chuyển dữ liệu từ BE lên FE và ngược lại
 ---FE: 2 file jsp
@@ -23,4 +20,3 @@ Mô tả chương trình: Demo CRUD sản phẩm điện thoại/phụ kiện
 -----ProductForm: Thêm, Sửa sản phẩm
 Một số lưu ý:
 --Nhiều trường chưa Validate
---Thêm thêm/sửa số lượng bằng số âm thì chương trình sẽ trả về 0 và lưu vào CSDL. Chương trình vẫn chạy bình thường dù Console có báo lỗi.

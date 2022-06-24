@@ -108,5 +108,10 @@ public class SanPhamDTO {
     public void setDonGia(float DonGia) {
         this.DonGia = DonGia;
     }
+    
+    @Override
+    public String toString() {
+    	return "<td>"+ MaSP + "</td>" + "<td>"+ TenSP + "</td>" + "<td>"+ SoLuong + "</td>" + "<td>"+ DonGia + "</td>";
+    }
 }
                                                                                                                                                           

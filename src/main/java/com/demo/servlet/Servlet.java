@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,8 +14,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.demo.model.SanPhamDAO;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.demo.model.SanPhamDTO;
+import com.demo.service.ProductListLocal;
 
 /**
  * Servlet implementation class MyServlet
@@ -24,14 +28,14 @@ public class Servlet extends HttpServlet {
 			
 	private static final long serialVersionUID = 1L;
  
-	private SanPhamDAO productConn;
+	@EJB
+	ProductListLocal productService;
 	
     /**
      * @see HttpServlet#HttpServlet()
      */
     public Servlet(){
         super();
-        productConn = new SanPhamDAO();
         // TODO Auto-generated constructor stub
     }
 
@@ -40,45 +44,7 @@ public class Servlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-				
-		String action = request.getServletPath();
-		int caseNum = 0;
-		
-		if(action.equalsIgnoreCase("/new"))
-			caseNum = 1;
-		if(action.equalsIgnoreCase("/edit"))
-			caseNum = 2;
-		if(action.equalsIgnoreCase("/insert"))
-			caseNum = 3;
-		if(action.equalsIgnoreCase("/delete"))
-			caseNum = 4;
-		if(action.equalsIgnoreCase("/update"))
-			caseNum = 5;
-		
-        try {
-            switch (caseNum) {
-            case 1:
-                showNewForm(request, response);
-                break;
-            case 2:
-                showEditForm(request, response);
-                break;
-            case 3:
-                insertProduct(request, response);
-                break;
-            case 4:
-                deleteProduct(request, response);
-                break;
-            case 5:
-                updateProduct(request, response);
-                break;
-            default:
-                listProduct(request, response);
-                break;
-            }
-        } catch (SQLException ex) {
-            throw new ServletException(ex);
-        }
+		doPost(request, response);		
 	}
 
 	/**
@@ -86,41 +52,75 @@ public class Servlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		doGet(request, response);
+		try {
+			String id = request.getParameter("id");
+			if(id == null || id.equals("")) {
+				String pname = request.getParameter("pname");
+				if(pname == null || pname.equals("")) {
+					listProduct(request, response);
+				}
+				else insertProduct(request, response);
+			}
+			else {
+				String pname = request.getParameter("pname");
+				if(pname == null || pname.equals("")) {
+					String edit = "";
+					edit = request.getParameter("edit");
+					if(edit != null && edit.equals("yes")) {
+						showEditForm(request, response);
+					}
+					else deleteProduct(request, response);
+				}
+				else updateProduct(request, response);
+			}
+		} catch (SQLException ex) {
+            throw new ServletException(ex);
+        }
 	}
 
     private void listProduct(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         
     	//goi service lay ds san pham
-    	ArrayList<Object> listProduct = productConn.docDSSP();
+    	ArrayList<SanPhamDTO> listProduct = productService.fetchProduct();
+    	ArrayList<SanPhamDTO> productTypeList = productService.getTypeList();
 
     	//gui danh sach san pham len jsp
         request.setAttribute("listProduct", listProduct);
+        request.setAttribute("typeList", productTypeList);
         RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductList.jsp");
         dispatcher.forward(request, response);
     }
  
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {  	
-    	ArrayList<Object> productTypeList = productConn.docDSLoaiSP();
-  
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductForm.jsp");
-        request.setAttribute("typeList", productTypeList);
-        dispatcher.forward(request, response);
-    }
- 
+//    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+//            throws ServletException, IOException {  	
+//    	ArrayList<SanPhamDTO> productTypeList = productService.getTypeList();
+//  
+//        RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductForm.jsp");
+//        request.setAttribute("typeList", productTypeList);
+//        dispatcher.forward(request, response);
+//    }
+// 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
+    	response.setContentType("application/json");
+    	
         String id = request.getParameter("id");
-        SanPhamDTO existingProduct = productConn.getSanphamByMaSP(id);
-		ArrayList<Object> productTypeList = productConn.docDSLoaiSP();
+        SanPhamDTO existingProduct = productService.getProductByID(id);
         
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/ProductForm.jsp");
-        request.setAttribute("product", existingProduct);
-        request.setAttribute("typeList", productTypeList);
-        dispatcher.forward(request, response);
- 
+        JSONObject jsonProduct = new JSONObject();
+        try {
+			jsonProduct.put("id", id);
+			jsonProduct.put("pname", existingProduct.getTenSP());
+			jsonProduct.put("pquantity", existingProduct.getSoLuong());
+			jsonProduct.put("price", existingProduct.getDonGia());
+			jsonProduct.put("ptype", existingProduct.getMaLoai());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        response.getWriter().write(jsonProduct.toString());
     }
  
     private void insertProduct(HttpServletRequest request, HttpServletResponse response)
@@ -148,8 +148,11 @@ public class Servlet extends HttpServlet {
 		}
         
         //goi service gui input ve CSDL
-        productConn.them(newProduct);
-        response.sendRedirect("list");
+        productService.insertProduct(newProduct);
+        
+        String table = getProductTable();
+        response.setContentType("text/html");
+        response.getWriter().write(table);
     }
  
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
@@ -161,20 +164,45 @@ public class Servlet extends HttpServlet {
         String ptype = request.getParameter("ptype");
  
         SanPhamDTO newProduct = new SanPhamDTO(id, pname, quantity, price, ptype);
-        productConn.sua(newProduct);
-        response.sendRedirect("list");
+        productService.updateProduct(newProduct);
+        
+        String table = getProductTable();
+        response.setContentType("text/html");
+        response.getWriter().write(table);
     }
  
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         String id = request.getParameter("id");
  
-        productConn.xoa(id);
-        response.sendRedirect("list");
+        productService.deleteProduct(id);
+        
+        String table = getProductTable();
+        response.setContentType("text/html");
+        response.getWriter().write(table);
     }
 	
+    public String getProductTable() {
+    	String table = "            <caption> List of Products </caption>"
+    			+ "            <tr>"
+    			+ "                <th>ProductID</th>"
+    			+ "                <th>ProductName</th>"
+    			+ "                <th>Quantity</th>"
+    			+ "                <th>Price</th>"
+    			+ "                <th>Action</th>"
+    			+ "            </tr>";
+    	
+    	ArrayList<SanPhamDTO> list = productService.fetchProduct();
+    	
+    	for(SanPhamDTO sp : list) {
+    		table +="<tr>" + sp.toString() + "<td> <button class=\"editToggle\" value=\"" + sp.getMaSP() + "\"> Edit </button> <button class=\"deleteToggle\" value=\"" + sp.getMaSP() + "\" onClick=\"return confirmDel()\"> Delete </button>" + "</td></tr>";
+    	}
+    	
+    	return table;
+    }
+    
 	 public String taoMaSP() throws Exception{
-	        ArrayList<Object> DSSanPham = productConn.docDSSP();
+	        ArrayList<SanPhamDTO> DSSanPham = productService.fetchProduct();
 	        
 	        if(DSSanPham.isEmpty()){
 	            return "sp001";

@@ -12,14 +12,14 @@ import java.util.List;
  */
 public class SanPhamDAO {
 
-    private ArrayList <Object> listOfProduct;
-    private ArrayList <Object> listOfType;
+    private ArrayList <SanPhamDTO> listOfProduct;
+    private ArrayList <SanPhamDTO> listOfType;
     
 	public void them(SanPhamDTO sp) {
             // start a transaction
         	Session session = HiberConnection.getSessionFactory().openSession();
             session.beginTransaction();
-            // save the new object
+            // save the new SanPhamDTO
             session.save(sp);
             // commit transaction
             session.getTransaction().commit();
@@ -30,7 +30,7 @@ public class SanPhamDAO {
         // start a transaction
     	Session session = HiberConnection.getSessionFactory().openSession();
         session.beginTransaction();
-        // update the existed object with new data
+        // update the existed SanPhamDTO with new data
         session.update(sp);
         // commit transaction
         session.getTransaction().commit();
@@ -41,7 +41,7 @@ public class SanPhamDAO {
         // start a transaction
     	Session session = HiberConnection.getSessionFactory().openSession();
         session.beginTransaction();
-        // get object by ID, then delete
+        // get SanPhamDTO by ID, then delete
         SanPhamDTO sp = session.get(SanPhamDTO.class, masp);
         if (sp != null) {
             session.delete(sp);              
@@ -56,7 +56,7 @@ public class SanPhamDAO {
         // start a transaction
     	Session session = HiberConnection.getSessionFactory().openSession();
         session.beginTransaction();
-        // Delete a user object
+        // Delete a user SanPhamDTO
         SanPhamDTO sp = session.get(SanPhamDTO.class, masp);
      // commit transaction
         session.getTransaction().commit();
@@ -66,14 +66,14 @@ public class SanPhamDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList <Object> docDSLoaiSP() {
+    public ArrayList <SanPhamDTO> docDSLoaiSP() {
 
-        listOfType = new ArrayList<Object>();
+        listOfType = new ArrayList<SanPhamDTO>();
         
         Session session = HiberConnection.getSessionFactory().openSession();
         session.beginTransaction();
      
-        List<Object> temp = session.createQuery("SELECT t from TypeDTO t").getResultList();
+        List<SanPhamDTO> temp = session.createQuery("SELECT t from TypeDTO t").getResultList();
         listOfType.addAll(temp);
      
         session.getTransaction().commit();
@@ -83,14 +83,14 @@ public class SanPhamDAO {
     }
     
     @SuppressWarnings("unchecked")
-    public ArrayList <Object> docDSSP() {
+    public ArrayList <SanPhamDTO> docDSSP() {
 
-        listOfProduct = new ArrayList<Object>();
+        listOfProduct = new ArrayList<SanPhamDTO>();
         
         Session session = HiberConnection.getSessionFactory().openSession();
         session.beginTransaction();
      
-        List<Object> temp = session.createQuery("SELECT s from SanPhamDTO s").getResultList();
+        List<SanPhamDTO> temp = session.createQuery("SELECT s from SanPhamDTO s").getResultList();
         listOfProduct.addAll(temp);
      
         session.getTransaction().commit();

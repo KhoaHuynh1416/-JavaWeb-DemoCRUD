@@ -8,9 +8,9 @@ import com.demo.model.SanPhamDTO;
 
 @Local
 public interface ProductListLocal {
-	ArrayList<Object> fetchProduct();	
+	ArrayList<SanPhamDTO> fetchProduct();	
 	SanPhamDTO getProductByID(String id);
-	ArrayList<Object> getTypeList();
+	ArrayList<SanPhamDTO> getTypeList();
 	
 	void insertProduct(SanPhamDTO sp);
 	void deleteProduct(String id);

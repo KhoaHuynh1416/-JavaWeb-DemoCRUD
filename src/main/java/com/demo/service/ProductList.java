@@ -33,7 +33,7 @@ public class ProductList implements ProductListRemote, ProductListLocal {
     }
 
 	@Override
-	public ArrayList<Object> fetchProduct() {
+	public ArrayList<SanPhamDTO> fetchProduct() {
 		// TODO Auto-generated method stub
 		try {
 			return productConn.docDSSP();
@@ -91,7 +91,7 @@ public class ProductList implements ProductListRemote, ProductListLocal {
 	}
 
 	@Override
-	public ArrayList<Object> getTypeList() {
+	public ArrayList<SanPhamDTO> getTypeList() {
 		// TODO Auto-generated method stub
 		try {
 			return productConn.docDSLoaiSP();
@@ -104,7 +104,7 @@ public class ProductList implements ProductListRemote, ProductListLocal {
 	}
 	
 	 public String taoMaSP() throws Exception{
-	        ArrayList<Object> DSSanPham = this.fetchProduct();
+	        ArrayList<SanPhamDTO> DSSanPham = this.fetchProduct();
 	        
 	        if(DSSanPham.isEmpty()){
 	            return "sp001";
